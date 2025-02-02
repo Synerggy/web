@@ -4,11 +4,12 @@ local InviteCode = "CaUVkK2YuV"
 
 local req = request or syn.request or http_request or fluxus.request 
 
-if not useStudio then
-    if req then
-        local ports = {6463, 6464, 6465, 6466}
-        for _, port in ipairs(ports) do
-            local success = pcall(function()
+if not useStudio and req then
+    local ports = {6463}
+
+    for _, port in ipairs(ports) do
+        task.spawn(function()
+            local success, response = pcall(function()
                 return req({
                     Url = 'http://127.0.0.1:' .. port .. '/rpc?v=1',
                     Method = 'POST',
@@ -20,11 +21,13 @@ if not useStudio then
                     })
                 })
             end)
-            if success then
+
+            if success and response then
                 print("Invite sent successfully on port " .. port)
-                break
+            else
+                print("Failed to send invite on port " .. port)
             end
-        end
+        end)
     end
 end
 
